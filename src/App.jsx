@@ -6,30 +6,88 @@ import Dashboard from './pages/Dashboard';
 import CreateDress from './pages/CreateDress';
 import DressList from './pages/DressList';
 import CalendarView from './pages/CalendarView';
+import ClientDashboard from './pages/ClientDashboard';
+import ClientSchedule from './pages/ClientSchedule';
+import { useAuth } from './context/AuthContext';
+
+// Helper component to redirect based on role
+const RoleBasedRedirect = () => {
+  const { userRole, currentUser } = useAuth();
+
+  if (!currentUser) return <Navigate to="/login" replace />;
+
+  // Admins go to main dashboard, clients go to client dashboard
+  return userRole === 'admin' ?
+    <Navigate to="/dashboard" replace /> :
+    <Navigate to="/client" replace />;
+};
 
 function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
 
-      {/* Protected Routes using Layout Wrapper */}
-      <Route
-        element={
-          <ProtectedRoute>
-            <Layout />
-          </ProtectedRoute>
-        }
-      >
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/dresses" element={<DressList />} />
-        <Route path="/dresses/new" element={<CreateDress />} />
-        <Route path="/calendar" element={<CalendarView />} />
-        {/* Redirect unknown protected routes to dashboard */}
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
-      </Route>
+      {/* Root redirect handles where an authenticated user should go implicitly */}
+      <Route path="/" element={<RoleBasedRedirect />} />
 
-      {/* Redirect all unknown public routes to login */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      {/* Protected Routes using Layout Wrapper */}
+      <Route element={<Layout />}>
+
+        {/* Admin Only Routes */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dresses"
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <DressList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dresses/new"
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <CreateDress />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/calendar"
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <CalendarView />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Client Oriented Routes */}
+        <Route
+          path="/client"
+          element={
+            <ProtectedRoute>
+              <ClientDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/client/schedule"
+          element={
+            <ProtectedRoute>
+              <ClientSchedule />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Redirect unknown internal routes based on role */}
+        <Route path="*" element={<RoleBasedRedirect />} />
+      </Route>
     </Routes>
   );
 }

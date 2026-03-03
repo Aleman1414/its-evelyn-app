@@ -16,12 +16,20 @@ export default function Layout() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const location = useLocation();
 
-    const navigation = [
+    const adminNavigation = [
         { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
         { name: 'Vestidos', href: '/dresses', icon: ListTodo },
         { name: 'Nuevo Vestido', href: '/dresses/new', icon: Scissors },
         { name: 'Calendario', href: '/calendar', icon: CalendarDays },
     ];
+
+    const clientNavigation = [
+        { name: 'Mis Diseños', href: '/client', icon: ListTodo },
+        { name: 'Agendar Vestido', href: '/client/schedule', icon: CalendarDays },
+    ];
+
+    const { userRole } = useAuth();
+    const navigation = userRole === 'admin' ? adminNavigation : clientNavigation;
 
     // Close mobile menu when route changes
     useEffect(() => {

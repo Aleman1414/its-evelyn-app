@@ -5,33 +5,63 @@ import {
     doc,
     deleteDoc,
     getDocs,
+    getDoc,
     query,
     where,
     orderBy,
-    serverTimestamp
+    serverTimestamp,
+    setDoc
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../config/firebase';
 
 const DRESSES_COLLECTION = 'dresses';
+const USERS_COLLECTION = 'users';
+
+// --- USER MANAGEMENT ---
+
+export const createUserProfile = async (userId, email, name, role = 'client') => {
+    const userRef = doc(db, USERS_COLLECTION, userId);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+        await setDoc(userRef, {
+            email,
+            name,
+            role,
+            createdAt: serverTimestamp()
+        });
+        return { email, name, role };
+    }
+    return userSnap.data();
+};
+
+export const getUserProfile = async (userId) => {
+    const userRef = doc(db, USERS_COLLECTION, userId);
+    const userSnap = await getDoc(userRef);
+    return userSnap.exists() ? userSnap.data() : null;
+};
+
+
+// --- DRESS MANAGEMENT ---
 
 // Function to upload an image to Firebase Storage
 export const uploadImage = async (file, userId) => {
     if (!file) return null;
     const fileExtension = file.name.split('.').pop();
     const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExtension}`;
-    const storageRef = ref(storage, `users/${userId}/dresses/${fileName}`);
+    // Store all reference images loosely by user who uploaded it
+    const storageRef = ref(storage, `uploads/${userId}/${fileName}`);
 
     const snapshot = await uploadBytes(storageRef, file);
-    const downloadUrl = await getDownloadURL(snapshot.ref);
-    return downloadUrl;
+    return await getDownloadURL(snapshot.ref);
 };
 
-// Create a new dress
-export const createDress = async (dressData, userId) => {
+// Create a new dress (Admin only logic usually, but here is generic)
+export const createDress = async (dressData, adminUid) => {
     const newDress = {
         ...dressData,
-        userId,
+        createdBy: adminUid,
         createdAt: serverTimestamp(),
         completedAt: null
     };
@@ -55,7 +85,24 @@ export const deleteDress = async (id) => {
     await deleteDoc(dressRef);
 };
 
-// Get all dresses for a specific user
+// --- QUERIES ---
+
+// Get ALL dresses (For Admin)
+export const getAllDresses = async () => {
+    const dressesRef = collection(db, DRESSES_COLLECTION);
+    const q = query(
+        dressesRef,
+        orderBy("deliveryDate", "asc")
+    );
+
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+    }));
+};
+
+// Get all dresses for a specific user (For Client)
 export const getUserDresses = async (userId) => {
     const dressesRef = collection(db, DRESSES_COLLECTION);
     const q = query(
@@ -69,4 +116,24 @@ export const getUserDresses = async (userId) => {
         id: doc.id,
         ...doc.data()
     }));
+};
+
+// Check if a specific date is already taken
+export const isDateAvailable = async (date) => {
+    // Normalize date to start of day
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const dressesRef = collection(db, DRESSES_COLLECTION);
+    const q = query(
+        dressesRef,
+        where("deliveryDate", ">=", startOfDay),
+        where("deliveryDate", "<=", endOfDay)
+    );
+
+    const snapshot = await getDocs(q);
+    return snapshot.empty; // True if no events on that day
 };
