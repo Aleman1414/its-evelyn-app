@@ -89,33 +89,54 @@ export const deleteDress = async (id) => {
 
 // Get ALL dresses (For Admin)
 export const getAllDresses = async () => {
-    const dressesRef = collection(db, DRESSES_COLLECTION);
-    const q = query(
-        dressesRef,
-        orderBy("deliveryDate", "asc")
-    );
+    console.log("Fetching all dresses (Admin)");
+    try {
+        const dressesRef = collection(db, DRESSES_COLLECTION);
+        const q = query(
+            dressesRef,
+            orderBy("deliveryDate", "asc")
+        );
 
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-    }));
+        const snapshot = await getDocs(q);
+        console.log(`Fetched ${snapshot.docs.length} dresses`);
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+    } catch (error) {
+        console.error("Error in getAllDresses:", error.code, error.message);
+        throw error;
+    }
 };
 
 // Get all dresses for a specific user (For Client)
 export const getUserDresses = async (userId) => {
-    const dressesRef = collection(db, DRESSES_COLLECTION);
-    const q = query(
-        dressesRef,
-        where("userId", "==", userId),
-        orderBy("deliveryDate", "asc")
-    );
+    console.log("Fetching dresses for user:", userId);
+    if (!userId) {
+        console.warn("getUserDresses called without userId");
+        return [];
+    }
+    try {
+        const dressesRef = collection(db, DRESSES_COLLECTION);
+        const q = query(
+            dressesRef,
+            where("userId", "==", userId),
+            orderBy("deliveryDate", "asc")
+        );
 
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-    }));
+        const snapshot = await getDocs(q);
+        console.log(`Fetched ${snapshot.docs.length} dresses for user ${userId}`);
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+    } catch (error) {
+        console.error("Error in getUserDresses:", error.code, error.message);
+        if (error.message.includes("index")) {
+            console.error("MISSING INDEX: Follow the link in the error above to create it.");
+        }
+        throw error;
+    }
 };
 
 // Check if a specific date is already taken
