@@ -21,25 +21,38 @@ const USERS_COLLECTION = 'users';
 // --- USER MANAGEMENT ---
 
 export const createUserProfile = async (userId, email, name, role = 'client') => {
-    const userRef = doc(db, USERS_COLLECTION, userId);
-    const userSnap = await getDoc(userRef);
+    console.log("Creating user profile for:", userId);
+    try {
+        const userRef = doc(db, USERS_COLLECTION, userId);
+        const userSnap = await getDoc(userRef);
 
-    if (!userSnap.exists()) {
-        await setDoc(userRef, {
-            email,
-            name,
-            role,
-            createdAt: serverTimestamp()
-        });
-        return { email, name, role };
+        if (!userSnap.exists()) {
+            await setDoc(userRef, {
+                email,
+                name,
+                role,
+                createdAt: serverTimestamp()
+            });
+            console.log("Profile created successfully");
+            return { email, name, role };
+        }
+        return userSnap.data();
+    } catch (error) {
+        console.error("Error in createUserProfile:", error.code, error.message);
+        throw error;
     }
-    return userSnap.data();
 };
 
 export const getUserProfile = async (userId) => {
-    const userRef = doc(db, USERS_COLLECTION, userId);
-    const userSnap = await getDoc(userRef);
-    return userSnap.exists() ? userSnap.data() : null;
+    console.log("Fetching user profile for:", userId);
+    try {
+        const userRef = doc(db, USERS_COLLECTION, userId);
+        const userSnap = await getDoc(userRef);
+        return userSnap.exists() ? userSnap.data() : null;
+    } catch (error) {
+        console.error("Error in getUserProfile:", error.code, error.message);
+        throw error;
+    }
 };
 
 
