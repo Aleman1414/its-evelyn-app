@@ -1,4 +1,4 @@
-# its-evelyn
+# Its Evelyn
 
 Una aplicación web moderna y elegante para la gestión de vestidos y trabajos personalizados de una modista.
 

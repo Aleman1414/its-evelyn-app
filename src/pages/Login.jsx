@@ -46,7 +46,7 @@ export default function Login() {
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-pink-100 text-pink-500 rounded-full mb-4">
                         <Scissors size={32} />
                     </div>
-                    <h1 className="text-3xl font-serif text-gray-800">its-evelyn</h1>
+                    <h1 className="text-3xl font-serif text-gray-800">Its Evelyn</h1>
                     <p className="text-pink-400 mt-2 text-sm font-medium uppercase tracking-widest">Gestión de Vestidos</p>
                 </div>
 

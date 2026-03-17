@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { createDress, isDateAvailable, uploadImage } from '../services/dressesService';
+import { createDress, isDateAvailable, uploadImage, hasMeasurements } from '../services/dressesService';
 import { Timestamp } from 'firebase/firestore';
 import {
     CalendarPlus,
@@ -18,6 +18,17 @@ export default function ScheduleDress() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [hasMeasurements, setHasMeasurements] = useState(null);
+
+    useEffect(() => {
+        const checkMeasurements = async () => {
+            if (currentUser) {
+                const has = await hasMeasurements(currentUser.uid);
+                setHasMeasurements(has);
+            }
+        };
+        checkMeasurements();
+    }, [currentUser]);
 
     const [date, setDate] = useState('');
     const [notes, setNotes] = useState('');
@@ -104,7 +115,13 @@ export default function ScheduleDress() {
                     </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-8 space-y-8">
+                {hasMeasurements === null ? (
+                    <div className="p-8 text-center">
+                        <Loader2 className="animate-spin mx-auto mb-4" size={32} />
+                        <p>Cargando...</p>
+                    </div>
+                ) : hasMeasurements ? (
+                    <form onSubmit={handleSubmit} className="p-8 space-y-8">
 
                     {error && (
                         <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm flex items-start border border-red-100">
@@ -205,6 +222,23 @@ export default function ScheduleDress() {
                     </div>
 
                 </form>
+                ) : (
+                    <div className="p-8 text-center">
+                        <AlertCircle className="mx-auto mb-4 text-yellow-500" size={48} />
+                        <h2 className="text-xl font-semibold text-gray-800 mb-2">Toma de Medidas Requerida</h2>
+                        <p className="text-gray-600 mb-4">
+                            Para crear tu primer vestido personalizado, necesitamos tomar tus medidas de manera presencial en el taller.
+                            Una vez tomadas las medidas, podrás agendar diseños futuros solo con imágenes de referencia.
+                        </p>
+                        <button
+                            onClick={() => navigate('/client')}
+                            className="bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md transition-colors"
+                        >
+                            Regresar al Dashboard
+                        </button>
+                    </div>
+                )}
+
             </div>
         </div>
     );

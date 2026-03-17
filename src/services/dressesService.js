@@ -150,8 +150,22 @@ export const getUserDresses = async (userId) => {
     }
 };
 
-// Check if a specific date is already taken
-export const isDateAvailable = async (date) => {
+// Check if user has measurements (has at least one completed dress)
+export const hasMeasurements = async (userId) => {
+    try {
+        const dressesRef = collection(db, DRESSES_COLLECTION);
+        const q = query(
+            dressesRef,
+            where("userId", "==", userId),
+            where("status", "==", "completed"),
+            limit(1)
+        );
+        const snapshot = await getDocs(q);
+        return !snapshot.empty;
+    } catch (error) {
+        return false;
+    }
+};
     // Normalize date to start of day
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);

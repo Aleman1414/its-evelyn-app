@@ -53,8 +53,8 @@ export default function Layout() {
                     }`}
             >
                 <div className="h-16 flex items-center px-6 border-b border-pink-50 bg-pink-50/30">
-                    <Scissors className="text-pink-400 mr-2" size={24} />
-                    <h1 className="font-serif text-xl font-semibold text-gray-800 tracking-wide">its-evelyn</h1>
+                    <img src="/logo.png" alt="Its Evelyn" className="w-8 h-8 mr-2" />
+                    <h1 className="font-serif text-xl font-semibold text-gray-800 tracking-wide">Its Evelyn</h1>
                 </div>
 
                 <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
