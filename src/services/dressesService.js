@@ -21,7 +21,6 @@ const USERS_COLLECTION = 'users';
 // --- USER MANAGEMENT ---
 
 export const createUserProfile = async (userId, email, name, role = 'client') => {
-    console.log("Creating user profile for:", userId);
     try {
         const userRef = doc(db, USERS_COLLECTION, userId);
         const userSnap = await getDoc(userRef);
@@ -33,24 +32,20 @@ export const createUserProfile = async (userId, email, name, role = 'client') =>
                 role,
                 createdAt: serverTimestamp()
             });
-            console.log("Profile created successfully");
             return { email, name, role };
         }
         return userSnap.data();
     } catch (error) {
-        console.error("Error in createUserProfile:", error.code, error.message);
         throw error;
     }
 };
 
 export const getUserProfile = async (userId) => {
-    console.log("Fetching user profile for:", userId);
     try {
         const userRef = doc(db, USERS_COLLECTION, userId);
         const userSnap = await getDoc(userRef);
         return userSnap.exists() ? userSnap.data() : null;
     } catch (error) {
-        console.error("Error in getUserProfile:", error.code, error.message);
         throw error;
     }
 };
@@ -61,6 +56,19 @@ export const getUserProfile = async (userId) => {
 // Function to upload an image to Firebase Storage
 export const uploadImage = async (file, userId) => {
     if (!file) return null;
+
+    // Validation: Check file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+        throw new Error('Tipo de archivo no permitido. Solo imágenes JPEG, PNG, GIF o WebP.');
+    }
+
+    // Validation: Check file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+        throw new Error('El archivo es demasiado grande. Máximo 5MB.');
+    }
+
     const fileExtension = file.name.split('.').pop();
     const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExtension}`;
     // Store all reference images loosely by user who uploaded it
@@ -102,7 +110,6 @@ export const deleteDress = async (id) => {
 
 // Get ALL dresses (For Admin)
 export const getAllDresses = async () => {
-    console.log("Fetching all dresses (Admin)");
     try {
         const dressesRef = collection(db, DRESSES_COLLECTION);
         const q = query(
@@ -111,22 +118,18 @@ export const getAllDresses = async () => {
         );
 
         const snapshot = await getDocs(q);
-        console.log(`Fetched ${snapshot.docs.length} dresses`);
         return snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         }));
     } catch (error) {
-        console.error("Error in getAllDresses:", error.code, error.message);
         throw error;
     }
 };
 
 // Get all dresses for a specific user (For Client)
 export const getUserDresses = async (userId) => {
-    console.log("Fetching dresses for user:", userId);
     if (!userId) {
-        console.warn("getUserDresses called without userId");
         return [];
     }
     try {
@@ -138,16 +141,11 @@ export const getUserDresses = async (userId) => {
         );
 
         const snapshot = await getDocs(q);
-        console.log(`Fetched ${snapshot.docs.length} dresses for user ${userId}`);
         return snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         }));
     } catch (error) {
-        console.error("Error in getUserDresses:", error.code, error.message);
-        if (error.message.includes("index")) {
-            console.error("MISSING INDEX: Follow the link in the error above to create it.");
-        }
         throw error;
     }
 };

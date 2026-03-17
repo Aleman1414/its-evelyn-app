@@ -47,7 +47,7 @@ export default function CalendarView() {
 
                 setEvents(calendarEvents);
             } catch (error) {
-                console.error("Error loading calendar events", error);
+                // Handle error silently
             } finally {
                 setLoading(false);
             }

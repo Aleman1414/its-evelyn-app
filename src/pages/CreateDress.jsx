@@ -97,7 +97,6 @@ export default function CreateDress() {
             navigate('/dresses');
 
         } catch (error) {
-            console.error("Error creando vestido:", error);
             alert("Hubo un error al guardar el vestido.");
         } finally {
             setLoading(false);

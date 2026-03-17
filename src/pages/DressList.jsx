@@ -32,7 +32,7 @@ export default function DressList() {
             const data = await getUserDresses(currentUser.uid);
             setDresses(data);
         } catch (error) {
-            console.error("Error fetching dresses", error);
+            // Handle error
         } finally {
             setLoading(false);
         }

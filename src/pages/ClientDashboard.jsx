@@ -18,7 +18,7 @@ export default function ClientDashboard() {
                 const data = await getUserDresses(currentUser.uid);
                 setDresses(data);
             } catch (error) {
-                console.error("Error cargando tus vestidos", error);
+                // Error handled silently or show user message
             } finally {
                 setLoading(false);
             }

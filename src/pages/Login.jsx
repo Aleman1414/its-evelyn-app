@@ -20,7 +20,6 @@ export default function Login() {
             navigate('/dashboard');
         } catch (err) {
             setError('Error al iniciar sesión. Revisa tus credenciales.');
-            console.error(err);
         } finally {
             setLoading(false);
         }
@@ -34,7 +33,6 @@ export default function Login() {
             navigate('/dashboard');
         } catch (err) {
             setError('Error al iniciar sesión con Google.');
-            console.error(err);
         } finally {
             setLoading(false);
         }

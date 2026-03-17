@@ -24,7 +24,7 @@ export default function Dashboard() {
                 const data = await getUserDresses(currentUser.uid);
                 setDresses(data);
             } catch (error) {
-                console.error("Error cargando vestidos:", error);
+                // Handle error
             } finally {
                 setLoading(false);
             }

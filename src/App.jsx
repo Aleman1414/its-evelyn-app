@@ -1,14 +1,17 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import CreateDress from './pages/CreateDress';
-import DressList from './pages/DressList';
-import CalendarView from './pages/CalendarView';
-import ClientDashboard from './pages/ClientDashboard';
-import ClientSchedule from './pages/ClientSchedule';
 import { useAuth } from './context/AuthContext';
+
+// Lazy load heavy components
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const CreateDress = lazy(() => import('./pages/CreateDress'));
+const DressList = lazy(() => import('./pages/DressList'));
+const CalendarView = lazy(() => import('./pages/CalendarView'));
+const ClientDashboard = lazy(() => import('./pages/ClientDashboard'));
+const ClientSchedule = lazy(() => import('./pages/ClientSchedule'));
 
 // Helper component to redirect based on role
 const RoleBasedRedirect = () => {
@@ -24,7 +27,8 @@ const RoleBasedRedirect = () => {
 
 function App() {
   return (
-    <Routes>
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Cargando...</div>}>
+      <Routes>
       <Route path="/login" element={<Login />} />
 
       {/* Root redirect handles where an authenticated user should go implicitly */}
@@ -89,6 +93,7 @@ function App() {
         <Route path="*" element={<RoleBasedRedirect />} />
       </Route>
     </Routes>
+    </Suspense>
   );
 }
 

@@ -1,9 +1,18 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow everything for logged-in users during development
-    match /{document=**} {
-      allow read, write: if request.auth != null;
+    // Users collection: Users can read/write their own profile, admins can read all
+    match /users/{userId} {
+      allow read, write: if request.auth != null && 
+        (request.auth.uid == userId || request.auth.token.role == 'admin');
+    }
+
+    // Dresses collection: Admins can do anything, clients can only access dresses they created or are assigned to
+    match /dresses/{dressId} {
+      allow read, write: if request.auth != null && 
+        (request.auth.token.role == 'admin' || resource.data.createdBy == request.auth.uid);
+      allow create: if request.auth != null && 
+        (request.auth.token.role == 'admin' || request.auth.uid == resource.data.createdBy);
     }
   }
 }

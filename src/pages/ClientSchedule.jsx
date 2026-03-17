@@ -83,7 +83,6 @@ export default function ScheduleDress() {
             navigate('/client');
 
         } catch (err) {
-            console.error("Error scheduling:", err);
             setError("Ocurrió un error al agendar la cita. Intenta de nuevo más tarde.");
         } finally {
             setLoading(false);
