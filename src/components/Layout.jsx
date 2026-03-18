@@ -14,6 +14,7 @@ import {
     Info,
     CalendarPlus
 } from 'lucide-react';
+import logo from '../assets/logo.png';
 
 export default function Layout() {
     const { logout, currentUser, userRole } = useAuth();
@@ -58,9 +59,8 @@ export default function Layout() {
                 className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-pink-100 flex flex-col transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
                     }`}
             >
-                <div className="h-16 flex items-center px-6 border-b border-pink-50 bg-pink-50/30">
-                    <Scissors className="text-pink-400 mr-2" size={24} />
-                    <h1 className="font-serif text-xl font-semibold text-gray-800 tracking-wide">Its Evelyn</h1>
+                <div className="h-20 flex items-center px-6 border-b border-pink-50 bg-white">
+                    <img src={logo} alt="Its Evelyn" className="h-12 w-auto" />
                 </div>
 
                 {/* Role badge */}

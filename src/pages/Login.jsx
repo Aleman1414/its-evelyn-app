@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Scissors, Mail, Lock } from 'lucide-react';
+import logo from '../assets/logo.png';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -42,11 +43,11 @@ export default function Login() {
         <div className="min-h-screen bg-[var(--color-background)] flex items-center justify-center p-4">
             <div className="max-w-md w-full bg-white rounded-3xl shadow-xl overflow-hidden">
                 {/* Header section */}
-                <div className="bg-pink-50 p-8 text-center border-b border-pink-100">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-pink-100 text-pink-500 rounded-full mb-4">
-                        <Scissors size={32} />
+                <div className="bg-white p-8 text-center border-b border-pink-50">
+                    <div className="flex justify-center mb-4">
+                        <img src={logo} alt="Its Evelyn" className="h-24 w-auto" />
                     </div>
-                    <h1 className="text-3xl font-serif text-gray-800">Its Evelyn</h1>
+                    <h1 className="text-3xl font-serif text-gray-800 hidden">Its Evelyn</h1>
                     <p className="text-pink-400 mt-2 text-sm font-medium uppercase tracking-widest">Gestión de Vestidos</p>
                 </div>
 
