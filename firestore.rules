@@ -1,18 +1,42 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users collection: Users can read/write their own profile, admins can read all
-    match /users/{userId} {
-      allow read, write: if request.auth != null && 
-        (request.auth.uid == userId || request.auth.token.role == 'admin');
+    
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function getUserRole() {
+      // Use get() safely only if user doc exists
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    
+    function isModista() {
+      return isSignedIn() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             getUserRole() == 'modista';
     }
 
-    // Dresses collection: Admins can do anything, clients can only access dresses they created or are assigned to
+    // Users collection
+    match /users/{userId} {
+      // Allowed to read if signed in (necessary for login check and isModista helper)
+      allow read: if isSignedIn();
+      // Only the user or modista can update profile
+      allow write: if isSignedIn() && (request.auth.uid == userId || isModista());
+    }
+
+    // Clients collection (Only Modista can manage, but Clienta can read their own if email match)
+    match /clients/{clientId} {
+      allow read: if isModista() || (isSignedIn() && request.auth.token.email == resource.data.email);
+      allow write: if isModista();
+    }
+
+    // Dresses collection
     match /dresses/{dressId} {
-      allow read, write: if request.auth != null && 
-        (request.auth.token.role == 'admin' || resource.data.createdBy == request.auth.uid);
-      allow create: if request.auth != null && 
-        (request.auth.token.role == 'admin' || request.auth.uid == resource.data.createdBy);
+      allow read: if isSignedIn() && (isModista() || resource.data.createdBy == request.auth.uid);
+      allow create: if isSignedIn() && (isModista() || request.resource.data.createdBy == request.auth.uid);
+      allow update, delete: if isSignedIn() && (isModista() || resource.data.createdBy == request.auth.uid);
     }
   }
 }

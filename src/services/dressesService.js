@@ -217,7 +217,7 @@ export const getUserDresses = async (userId) => {
         const dressesRef = collection(db, DRESSES_COLLECTION);
         const q = query(
             dressesRef,
-            where("userId", "==", userId),
+            where("createdBy", "==", userId),
             orderBy("deliveryDate", "asc")
         );
 
@@ -227,6 +227,7 @@ export const getUserDresses = async (userId) => {
             ...doc.data()
         }));
     } catch (error) {
+        console.error("Error in getUserDresses:", error);
         throw error;
     }
 };
@@ -237,7 +238,7 @@ export const hasMeasurements = async (userId) => {
         const dressesRef = collection(db, DRESSES_COLLECTION);
         const q = query(
             dressesRef,
-            where("userId", "==", userId),
+            where("createdBy", "==", userId),
             where("status", "==", "completed"),
             limit(1)
         );
@@ -250,20 +251,25 @@ export const hasMeasurements = async (userId) => {
 
 // Check if a date is available for delivery (only one dress per day)
 export const isDateAvailable = async (date) => {
-    // Normalize date to start of day
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
+    try {
+        // Normalize date to start of day
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
 
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
+        const endOfDay = new Date(date);
+        endOfDay.setHours(23, 59, 59, 999);
 
-    const dressesRef = collection(db, DRESSES_COLLECTION);
-    const q = query(
-        dressesRef,
-        where("deliveryDate", ">=", startOfDay),
-        where("deliveryDate", "<=", endOfDay)
-    );
+        const dressesRef = collection(db, DRESSES_COLLECTION);
+        const q = query(
+            dressesRef,
+            where("deliveryDate", ">=", startOfDay),
+            where("deliveryDate", "<=", endOfDay)
+        );
 
-    const snapshot = await getDocs(q);
-    return snapshot.empty; // True if no events on that day
+        const snapshot = await getDocs(q);
+        return snapshot.empty; // True if no events on that day
+    } catch (error) {
+        console.error("Error in isDateAvailable:", error);
+        return false;
+    }
 };
