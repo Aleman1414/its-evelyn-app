@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { createDress, isDateAvailable, uploadImage, hasMeasurements } from '../services/dressesService';
@@ -18,13 +18,18 @@ export default function ScheduleDress() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [hasMeasurements, setHasMeasurements] = useState(null);
+    const [measurementsExist, setMeasurementsExist] = useState(null);
 
     useEffect(() => {
         const checkMeasurements = async () => {
             if (currentUser) {
-                const has = await hasMeasurements(currentUser.uid);
-                setHasMeasurements(has);
+                try {
+                    const exists = await hasMeasurements(currentUser.uid);
+                    setMeasurementsExist(exists);
+                } catch (err) {
+                    console.error("Error checking measurements:", err);
+                    setMeasurementsExist(false);
+                }
             }
         };
         checkMeasurements();
@@ -115,12 +120,12 @@ export default function ScheduleDress() {
                     </p>
                 </div>
 
-                {hasMeasurements === null ? (
+                {measurementsExist === null ? (
                     <div className="p-8 text-center">
                         <Loader2 className="animate-spin mx-auto mb-4" size={32} />
                         <p>Cargando...</p>
                     </div>
-                ) : hasMeasurements ? (
+                ) : measurementsExist ? (
                     <form onSubmit={handleSubmit} className="p-8 space-y-8">
 
                     {error && (
