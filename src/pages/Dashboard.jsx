@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getUserDresses } from '../services/dressesService';
+import { getAllDresses } from '../services/dressesService';
 import { Link } from 'react-router-dom';
 import {
     Scissors,
     Clock,
     CheckCircle2,
     CalendarClock,
-    ArrowRight
+    ArrowRight,
+    Users
 } from 'lucide-react';
 import { format, isAfter, isBefore, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -21,7 +22,8 @@ export default function Dashboard() {
         async function loadStats() {
             if (!currentUser) return;
             try {
-                const data = await getUserDresses(currentUser.uid);
+                // Modista sees ALL dresses
+                const data = await getAllDresses();
                 setDresses(data);
             } catch (error) {
                 // Handle error
@@ -153,18 +155,38 @@ export default function Dashboard() {
                 </div>
 
                 {/* Quick Actions Panel */}
-                <div className="bg-gradient-to-br from-pink-400 to-pink-500 rounded-3xl p-8 text-white shadow-md flex flex-col justify-between">
-                    <div>
-                        <h2 className="text-2xl font-serif font-semibold mb-2">Crear nueva magia</h2>
-                        <p className="text-pink-100 mb-8 max-w-sm">
-                            ¿Llegó una nueva clienta? Registra su próximo vestido y mantén todo organizado.
-                        </p>
+                <div className="space-y-6">
+                    <div className="bg-gradient-to-br from-pink-400 to-pink-500 rounded-3xl p-8 text-white shadow-md flex flex-col justify-between">
+                        <div>
+                            <h2 className="text-2xl font-serif font-semibold mb-2">Crear nueva magia</h2>
+                            <p className="text-pink-100 mb-8 max-w-sm">
+                                ¿Llegó una nueva clienta? Registra su próximo vestido y mantén todo organizado.
+                            </p>
+                        </div>
+                        <Link
+                            to="/dresses/new"
+                            className="bg-white text-pink-500 font-semibold py-3 px-6 rounded-xl text-center hover:bg-pink-50 transition-colors active:scale-95 shadow-sm"
+                        >
+                            + Registrar Nuevo Vestido
+                        </Link>
                     </div>
+
                     <Link
-                        to="/dresses/new"
-                        className="bg-white text-pink-500 font-semibold py-3 px-6 rounded-xl text-center hover:bg-pink-50 transition-colors active:scale-95 shadow-sm"
+                        to="/clients"
+                        className="block bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow group"
                     >
-                        + Registrar Nuevo Vestido
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-4">
+                                <div className="p-3 bg-purple-50 rounded-xl text-purple-500 group-hover:bg-purple-100 transition-colors">
+                                    <Users size={24} />
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold text-gray-800">Gestionar Clientas</h3>
+                                    <p className="text-sm text-gray-500">Ver medidas y registrar nuevas clientas</p>
+                                </div>
+                            </div>
+                            <ArrowRight size={20} className="text-gray-400 group-hover:text-pink-500 transition-colors" />
+                        </div>
                     </Link>
                 </div>
 

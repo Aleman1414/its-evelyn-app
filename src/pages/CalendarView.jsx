@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getUserDresses } from '../services/dressesService';
+import { getAllDresses } from '../services/dressesService';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -28,7 +28,8 @@ export default function CalendarView() {
         async function fetchDresses() {
             if (!currentUser) return;
             try {
-                const data = await getUserDresses(currentUser.uid);
+                // Modista sees ALL dresses in calendar
+                const data = await getAllDresses();
 
                 // Transform dress data to Calendar Events
                 const calendarEvents = data
@@ -79,7 +80,7 @@ export default function CalendarView() {
                 </div>
                 <div>
                     <h1 className="text-2xl font-serif font-bold text-gray-800">Calendario de Entregas</h1>
-                    <p className="text-sm text-gray-500">Haz seguimiento de tus próximas entregas agendadas.</p>
+                    <p className="text-sm text-gray-500">Todas las entregas agendadas de tus clientas.</p>
                 </div>
             </div>
 

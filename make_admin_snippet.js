@@ -1,17 +1,18 @@
-// Script to promote a user to Admin
-// Usage: Run this in your browser console after logging into your app
-// Replace 'YOUR_USER_UID' with the UID from Firebase Auth.
-
-/* 
-async function makeMeAdmin(uid) {
-  const { doc, updateDoc } = await import('firebase/firestore');
-  const { db } = await import('./src/config/firebase.js'); // adjust path if running locally from src
-  
-  await updateDoc(doc(db, 'users', uid), {
-    role: 'admin'
-  });
-  console.log("Success! You are now an Admin. Refresh the page.");
-}
-
-makeMeAdmin('YOUR_USER_UID'); 
-*/
+// Run this snippet in your browser's DevTools console while logged in
+// to the Firebase project to promote a user to 'modista' role.
+//
+// Replace YOUR_USER_ID with the user's Firebase Auth UID.
+//
+// firebase.firestore().collection('users').doc('YOUR_USER_ID').update({ role: 'modista' })
+//
+// Or via the Firebase Console:
+// 1. Go to Firestore Database
+// 2. Navigate to the 'users' collection
+// 3. Find the document with the user's UID
+// 4. Change the 'role' field from 'clienta' to 'modista'
+//
+// Example using the Admin SDK (Node.js):
+// const admin = require('firebase-admin');
+// admin.initializeApp();
+// const db = admin.firestore();
+// db.collection('users').doc('YOUR_USER_ID').update({ role: 'modista' });

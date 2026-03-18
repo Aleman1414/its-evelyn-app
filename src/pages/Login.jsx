@@ -17,7 +17,7 @@ export default function Login() {
             setError('');
             setLoading(true);
             await loginWithEmail(email, password);
-            navigate('/dashboard');
+            navigate('/');
         } catch (err) {
             setError('Error al iniciar sesión. Revisa tus credenciales.');
         } finally {
@@ -30,7 +30,7 @@ export default function Login() {
             setError('');
             setLoading(true);
             await loginWithGoogle();
-            navigate('/dashboard');
+            navigate('/');
         } catch (err) {
             setError('Error al iniciar sesión con Google.');
         } finally {

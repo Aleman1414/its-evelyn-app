@@ -9,6 +9,7 @@ import {
     query,
     where,
     orderBy,
+    limit,
     serverTimestamp,
     setDoc
 } from 'firebase/firestore';
@@ -17,10 +18,11 @@ import { db, storage } from '../config/firebase';
 
 const DRESSES_COLLECTION = 'dresses';
 const USERS_COLLECTION = 'users';
+const CLIENTS_COLLECTION = 'clients';
 
 // --- USER MANAGEMENT ---
 
-export const createUserProfile = async (userId, email, name, role = 'client') => {
+export const createUserProfile = async (userId, email, name, role = 'clienta') => {
     try {
         const userRef = doc(db, USERS_COLLECTION, userId);
         const userSnap = await getDoc(userRef);
@@ -50,6 +52,86 @@ export const getUserProfile = async (userId) => {
     }
 };
 
+// --- CLIENT MANAGEMENT (Modista manages clients) ---
+
+export const getAllClients = async () => {
+    try {
+        const clientsRef = collection(db, CLIENTS_COLLECTION);
+        const q = query(clientsRef, orderBy("name", "asc"));
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+    } catch (error) {
+        console.error("Error in getAllClients:", error);
+        throw error;
+    }
+};
+
+export const getClientById = async (clientId) => {
+    try {
+        const clientRef = doc(db, CLIENTS_COLLECTION, clientId);
+        const clientSnap = await getDoc(clientRef);
+        return clientSnap.exists() ? { id: clientSnap.id, ...clientSnap.data() } : null;
+    } catch (error) {
+        console.error("Error in getClientById:", error);
+        throw error;
+    }
+};
+
+export const createClient = async (clientData) => {
+    try {
+        const newClient = {
+            ...clientData,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+        };
+        const docRef = await addDoc(collection(db, CLIENTS_COLLECTION), newClient);
+        return docRef.id;
+    } catch (error) {
+        console.error("Error in createClient:", error);
+        throw error;
+    }
+};
+
+export const updateClient = async (clientId, updatedData) => {
+    try {
+        const clientRef = doc(db, CLIENTS_COLLECTION, clientId);
+        await updateDoc(clientRef, {
+            ...updatedData,
+            updatedAt: serverTimestamp()
+        });
+    } catch (error) {
+        console.error("Error in updateClient:", error);
+        throw error;
+    }
+};
+
+export const deleteClient = async (clientId) => {
+    try {
+        const clientRef = doc(db, CLIENTS_COLLECTION, clientId);
+        await deleteDoc(clientRef);
+    } catch (error) {
+        console.error("Error in deleteClient:", error);
+        throw error;
+    }
+};
+
+// Get client profile linked by email (for authenticated clienta users)
+export const getClientByEmail = async (email) => {
+    try {
+        const clientsRef = collection(db, CLIENTS_COLLECTION);
+        const q = query(clientsRef, where("email", "==", email));
+        const snapshot = await getDocs(q);
+        if (snapshot.empty) return null;
+        const docSnap = snapshot.docs[0];
+        return { id: docSnap.id, ...docSnap.data() };
+    } catch (error) {
+        console.error("Error in getClientByEmail:", error);
+        throw error;
+    }
+};
 
 // --- DRESS MANAGEMENT ---
 
@@ -71,14 +153,13 @@ export const uploadImage = async (file, userId) => {
 
     const fileExtension = file.name.split('.').pop();
     const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExtension}`;
-    // Store all reference images loosely by user who uploaded it
     const storageRef = ref(storage, `uploads/${userId}/${fileName}`);
 
     const snapshot = await uploadBytes(storageRef, file);
     return await getDownloadURL(snapshot.ref);
 };
 
-// Create a new dress (Admin only logic usually, but here is generic)
+// Create a new dress
 export const createDress = async (dressData, adminUid) => {
     const newDress = {
         ...dressData,
@@ -108,7 +189,7 @@ export const deleteDress = async (id) => {
 
 // --- QUERIES ---
 
-// Get ALL dresses (For Admin)
+// Get ALL dresses (For Modista)
 export const getAllDresses = async () => {
     try {
         const dressesRef = collection(db, DRESSES_COLLECTION);
@@ -127,7 +208,7 @@ export const getAllDresses = async () => {
     }
 };
 
-// Get all dresses for a specific user (For Client)
+// Get all dresses for a specific user (For Clienta)
 export const getUserDresses = async (userId) => {
     if (!userId) {
         return [];
@@ -166,6 +247,9 @@ export const hasMeasurements = async (userId) => {
         return false;
     }
 };
+
+// Check if a date is available for delivery (only one dress per day)
+export const isDateAvailable = async (date) => {
     // Normalize date to start of day
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);

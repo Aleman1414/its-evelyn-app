@@ -18,6 +18,7 @@ export function useAuth() {
 export function AuthProvider({ children }) {
     const [currentUser, setCurrentUser] = useState(null);
     const [userRole, setUserRole] = useState(null);
+    const [userProfile, setUserProfile] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -28,18 +29,20 @@ export function AuthProvider({ children }) {
                 // Fetch or create profile logic
                 let profile = await getUserProfile(user.uid);
 
-                // If no profile exists, create a default 'client' profile
+                // If no profile exists, create a default 'clienta' profile
                 if (!profile) {
                     profile = await createUserProfile(
                         user.uid,
                         user.email,
                         user.displayName || user.email.split('@')[0],
-                        'client'
+                        'clienta'
                     );
                 }
                 setUserRole(profile.role);
+                setUserProfile(profile);
             } else {
                 setUserRole(null);
+                setUserProfile(null);
             }
 
             setLoading(false);
@@ -54,8 +57,8 @@ export function AuthProvider({ children }) {
 
     const registerWithEmail = async (email, password, name) => {
         const res = await createUserWithEmailAndPassword(auth, email, password);
-        // Explicitly create user profile as client
-        await createUserProfile(res.user.uid, email, name, 'client');
+        // Explicitly create user profile as clienta
+        await createUserProfile(res.user.uid, email, name, 'clienta');
         return res;
     };
 
@@ -70,6 +73,7 @@ export function AuthProvider({ children }) {
     const value = {
         currentUser,
         userRole,
+        userProfile,
         loginWithEmail,
         registerWithEmail,
         loginWithGoogle,

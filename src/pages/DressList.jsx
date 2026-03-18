@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getUserDresses, updateDress, deleteDress } from '../services/dressesService';
+import { getAllDresses, updateDress, deleteDress } from '../services/dressesService';
 import { Link } from 'react-router-dom';
 import {
     Plus,
@@ -29,7 +29,8 @@ export default function DressList() {
         if (!currentUser) return;
         setLoading(true);
         try {
-            const data = await getUserDresses(currentUser.uid);
+            // Modista sees ALL dresses
+            const data = await getAllDresses();
             setDresses(data);
         } catch (error) {
             // Handle error

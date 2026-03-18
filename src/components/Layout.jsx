@@ -8,28 +8,34 @@ import {
     CalendarDays,
     LogOut,
     Menu,
-    X
+    X,
+    Users,
+    Ruler,
+    Info,
+    CalendarPlus
 } from 'lucide-react';
 
 export default function Layout() {
-    const { logout, currentUser } = useAuth();
+    const { logout, currentUser, userRole } = useAuth();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const location = useLocation();
 
-    const adminNavigation = [
+    const modistaNavigation = [
         { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
+        { name: 'Clientas', href: '/clients', icon: Users },
         { name: 'Vestidos', href: '/dresses', icon: ListTodo },
         { name: 'Nuevo Vestido', href: '/dresses/new', icon: Scissors },
         { name: 'Calendario', href: '/calendar', icon: CalendarDays },
     ];
 
-    const clientNavigation = [
-        { name: 'Mis Diseños', href: '/client', icon: ListTodo },
-        { name: 'Agendar Vestido', href: '/client/schedule', icon: CalendarDays },
+    const clientaNavigation = [
+        { name: 'Mi Clóset', href: '/client', icon: ListTodo },
+        { name: 'Agendar Vestido', href: '/client/schedule', icon: CalendarPlus },
+        { name: 'Mis Medidas', href: '/client/my-measurements', icon: Ruler },
+        { name: 'Info del Taller', href: '/client/workshop', icon: Info },
     ];
 
-    const { userRole } = useAuth();
-    const navigation = userRole === 'admin' ? adminNavigation : clientNavigation;
+    const navigation = userRole === 'modista' ? modistaNavigation : clientaNavigation;
 
     // Close mobile menu when route changes
     useEffect(() => {
@@ -55,6 +61,17 @@ export default function Layout() {
                 <div className="h-16 flex items-center px-6 border-b border-pink-50 bg-pink-50/30">
                     <img src="/logo.png" alt="Its Evelyn" className="w-8 h-8 mr-2" />
                     <h1 className="font-serif text-xl font-semibold text-gray-800 tracking-wide">Its Evelyn</h1>
+                </div>
+
+                {/* Role badge */}
+                <div className="px-6 py-3 border-b border-gray-50">
+                    <span className={`inline-flex items-center text-xs font-medium px-3 py-1 rounded-full ${
+                        userRole === 'modista' 
+                            ? 'bg-purple-50 text-purple-600' 
+                            : 'bg-pink-50 text-pink-600'
+                    }`}>
+                        {userRole === 'modista' ? '✂️ Modista' : '👗 Clienta'}
+                    </span>
                 </div>
 
                 <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
